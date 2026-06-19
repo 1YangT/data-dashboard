@@ -39,10 +39,18 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     
     # 处理缺失值
     for col in df_clean.columns:
-        if df_clean[col].dtype == 'object':
+        try:
+            # 尝试转换为数值类型
+            df_clean[col] = pd.to_numeric(df_clean[col], errors='ignore')
+            
+            # 如果是数值类型，用均值填充
+            if pd.api.types.is_numeric_dtype(df_clean[col]):
+                df_clean[col] = df_clean[col].fillna(df_clean[col].mean())
+            else:
+                # 否则用'未知'填充
+                df_clean[col] = df_clean[col].fillna('未知')
+        except Exception as e:
             df_clean[col] = df_clean[col].fillna('未知')
-        else:
-            df_clean[col] = df_clean[col].fillna(df_clean[col].mean())
     
     return df_clean
 
